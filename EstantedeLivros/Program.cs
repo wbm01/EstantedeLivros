@@ -1,5 +1,5 @@
-﻿using System;
-using System.ComponentModel.Design;
+﻿using System.ComponentModel.Design;
+using System.Globalization;
 using EstantedeLivros;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -7,50 +7,61 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        int escolha;
-        string escolha2;
-        string nomeemprestado;
+        int escolhamenu;
+        string escolhaemprestimo;
+        string escolhaleitura;
         List<Books> lista = new List<Books>();
         List<Books> listaemprestar = new List<Books>();
+        List<Books> listaleitura = new List<Books>();
 
         do
         {
-            escolha = Menu();
+            escolhamenu = Menu();
 
-            switch (escolha)
+            switch (escolhamenu)
             {
 
                 case 1:
                     Books books = CadastrarLivro();
                     lista.Add(books);
-                    EscreverArquivo(books);
+                    CriarArquivoLivrosDisponiveis();
                     break;
 
                 case 2:
 
                     Console.Write("\nInforme o nome do livro para empréstimo: ");
-                    escolha2 = Console.ReadLine();
-                    listaemprestar.Add(EscreverArquivoEmprestimoLista(lista, escolha2));
-                    foreach(var item in listaemprestar)
-                    {
-                        Console.WriteLine(item);
-                    }
-                    //lista.Remove(DeletarLivroLista(lista, escolha2));
+                    escolhaemprestimo = Console.ReadLine();
+                    listaemprestar.Add(IncluirListaEmprestimo(lista, escolhaemprestimo));
+                    lista.Remove(DeletarLivro());
+                    CriarArquivoLivrosEmprestados();
+                    CriarArquivoLivrosDisponiveis();
                     break;
 
-                /*case 3:
-                    LerLivro();
-                    break;*/
+                case 3:
+                    Console.Write("\nInforme o nome do livro que deseja ler: ");
+                    escolhaleitura = Console.ReadLine();
+                    listaleitura.Add(IncluirListaLeitura(lista, listaemprestar, escolhaleitura));
+                    lista.Remove(IncluirListaLeitura(lista, listaemprestar, escolhaleitura));
+                    CriarArquivoLivrosLeitura();
+                    CriarArquivoLivrosDisponiveis();
+                    break;
 
                 case 4:
-                    var texto2 = LerArquivo("cadastrolivro.txt");
-                    Console.WriteLine(texto2);
+                    //ImprimirListaLivrosDisponiveis();
+                    string retorno = LerArquivo("cadastrolivro.txt");
+                    Console.WriteLine(retorno);
                     break;
 
                 case 5:
-                    EscreverArquivoEmprestimo(listaemprestar);
-                    /*string texto3 = LerArquivo("cadastroemprestimo.txt");
-                    Console.WriteLine(texto3);*/
+                    //ImprimirListaEmprestimo();
+                    string retorno2 = LerArquivo("cadastroemprestimo.txt");
+                    Console.WriteLine(retorno2);
+                    break;
+
+                case 6:
+                    //ImprimirListaLeitura();
+                    string retorno3 = LerArquivo("cadastrolivroleitura.txt");
+                    Console.WriteLine(retorno3);
                     break;
             }
 
@@ -64,7 +75,8 @@ internal class Program
             Console.WriteLine("**BEM-VINDO A ESTANTE VIRTUAL!**");
 
             Console.WriteLine("\n1 - Cadastrar Livro" + "\n2 - Emprestar Livro" +
-                "\n3 - Ler Livro" + "\n4 - Lista de Livros" + "\n5 - Lista de Livros Emprestados");
+                "\n3 - Ler Livro" + "\n4 - Lista de Livros disponíveis" + "\n5 - Lista de Livros Emprestados" +
+                "\n6 - Lista de Livros Separados para Leitura");
 
             Console.Write("\nEscolha a opção desejada: ");
             escolhamenu = int.Parse(Console.ReadLine());
@@ -75,28 +87,154 @@ internal class Program
 
         Books CadastrarLivro()
         {
+            try
+            {
+                Console.Write("\nInforme o nome do livro: ");
+                string name = Console.ReadLine();
 
-            Console.Write("\nInforme o nome do livro: ");
-            string name = Console.ReadLine();
+                Console.Write("\nInforme a edição: ");
+                string edition = Console.ReadLine();
 
-            Console.Write("\nInforme a edição: ");
-            string edition = Console.ReadLine();
+                Console.Write("\nInforme o autor: ");
+                string writer = Console.ReadLine();
 
-            Console.Write("\nInforme o autor: ");
-            string writer = Console.ReadLine();
+                Console.Write("\nInforme o autor 2: ");
+                string writer2 = Console.ReadLine();
 
-            Console.Write("\nInforme o autor 2: ");
-            string writer2 = Console.ReadLine();
+                Console.Write("\nInforme o ISBN: ");
+                string isbn = Console.ReadLine();
 
-            Console.Write("\nInforme o ISBN: ");
-            string isbn = Console.ReadLine();
-
-
-
-            return new Books(name, edition, writer, writer2, isbn);
+                return new Books(name, edition, writer, writer2, isbn);
+            }
+            catch
+            {
+                Console.WriteLine("Não foi possível gravar!");
+            }
+            finally
+            {
+                Console.WriteLine("Livro cadastrado com sucesso!");
+            }
+            return null;
         } // ok
 
-        void EscreverArquivo(Books books)
+        Books IncluirListaEmprestimo(List<Books> l, string s)
+        {
+            try
+            {
+                foreach (var item in l)
+                {
+
+                    if (item.Name == s)
+                    {
+                        return item;
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Não foi possível gravar!");
+            }
+            finally
+            {
+                Console.WriteLine("Livro emprestado com sucesso!");
+            }
+
+            return null;
+
+        }
+
+        Books DeletarLivro()
+        {
+            foreach (var item in lista)
+            {
+
+                if (item.Name == escolhaemprestimo)
+                {
+                    return item;
+                }
+                else
+                {
+                    Console.WriteLine("Livro não encontrado!");
+
+                }
+            }
+            return null;
+
+        }
+
+        void ImprimirListaLivrosDisponiveis()
+        {
+            foreach (var item in lista)
+            {
+                if (item == null)
+                {
+                    Console.WriteLine("Lista vazia!");
+                }
+                else
+                {
+                    Console.WriteLine(item);
+                }
+            }
+        }
+
+        void ImprimirListaEmprestimo()
+        {
+            foreach (var item in listaemprestar)
+            {
+                if (item == null)
+                {
+                    Console.WriteLine("Lista vazia!");
+                }
+                else
+                {
+                    Console.WriteLine(item);
+                }
+            }
+        }
+
+        Books IncluirListaLeitura(List<Books> l, List<Books> e, string s)
+        {
+
+            foreach (var item in l)
+            {
+                foreach (var item2 in e)
+                {
+                    if (item.Name == s)
+                    {
+                        Console.WriteLine("Livro separado para leitura!");
+                        return item;
+                    }
+                    else if (item2.Name == s)
+                    {
+                        Console.WriteLine("Livro emprestado, não foi possível separar para leitura!");
+                        return null;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Livro não encontrado!");
+
+                    }
+                }
+            }
+            return null;
+        }
+
+        void ImprimirListaLeitura()
+        {
+            foreach (var item in listaleitura)
+            {
+                if (item == null)
+                {
+                    Console.WriteLine("Lista vazia!");
+                }
+                else
+                {
+                    Console.WriteLine(item);
+                }
+            }
+        }
+
+        void CriarArquivoLivrosDisponiveis()
         {
             try
             {
@@ -104,13 +242,21 @@ internal class Program
                 {
                     var temp = LerArquivo("cadastrolivro.txt");
                     StreamWriter sw = new StreamWriter("cadastrolivro.txt");
-                    sw.WriteLine(temp + books.ToString());
+                    for (int i = 0; i < lista.Count; i++)
+                    {
+                        sw.WriteLine(lista[i].ToString());
+                    }
+                    //Console.WriteLine(temp.ToString());
+
                     sw.Close();
                 }
                 else
                 {
                     StreamWriter sw = new("cadastrolivro.txt");
-                    sw.WriteLine(books.ToString());
+                    for (int i = 0; i < lista.Count; i++)
+                    {
+                        sw.WriteLine(lista[i].ToString());
+                    }
                     sw.Close();
                 }
             }
@@ -120,11 +266,88 @@ internal class Program
             }
             finally
             {
-                Console.WriteLine("Livro gravado com sucesso!");
+
                 Thread.Sleep(1000);
                 Console.WriteLine();
             }
-        } // ok
+        }
+
+        void CriarArquivoLivrosEmprestados()
+        {
+            try
+            {
+                if (File.Exists("cadastroemprestimo.txt"))
+                {
+                    var temp2 = LerArquivo("cadastroemprestimo.txt");
+                    StreamWriter sw = new StreamWriter("cadastroemprestimo.txt");
+                    for (int i = 0; i < listaemprestar.Count; i++)
+                    {
+
+                        sw.WriteLine(listaemprestar[i].ToString());
+                    }
+                    //Console.WriteLine(temp2.ToString());
+
+                    sw.Close();
+                }
+                else
+                {
+                    StreamWriter sw = new("cadastroemprestimo.txt");
+                    for (int i = 0; i < listaemprestar.Count; i++)
+                    {
+                        sw.WriteLine(listaemprestar[i].ToString());
+                    }
+                    sw.Close();
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("ERRO: Não foi possível incluír o livro!");
+            }
+            finally
+            {
+
+                Thread.Sleep(1000);
+                Console.WriteLine();
+            }
+        }
+
+        void CriarArquivoLivrosLeitura()
+        {
+            try
+            {
+                if (File.Exists("cadastrolivroleitura.txt"))
+                {
+                    var temp3 = LerArquivo("cadastrolivroleitura.txt");
+                    StreamWriter sw = new StreamWriter("cadastrolivroleitura.txt");
+                    for (int i = 0; i < listaleitura.Count; i++)
+                    {
+                        sw.WriteLine(listaleitura[i].ToString());
+                    }
+                    //Console.WriteLine(temp3.ToString());
+
+                    sw.Close();
+                }
+                else
+                {
+                    StreamWriter sw = new("cadastrolivroleitura.txt");
+                    for (int i = 0; i < listaleitura.Count; i++)
+                    {
+                        sw.WriteLine(listaleitura[i].ToString());
+                    }
+                    sw.Close();
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("ERRO: Não foi possível incluír o livro!");
+            }
+            finally
+            {
+
+                Thread.Sleep(1000);
+                Console.WriteLine();
+            }
+        }
 
         string LerArquivo(string f)
         {
@@ -137,139 +360,12 @@ internal class Program
                 sr.Close();
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Lista vazia!");
             }
-            /*finally
-            {
-                sr.Close();
-            }*/
+
             return text;
-
-
-        } // ok
-
-
-
-
-
-        Books EscreverArquivoEmprestimoLista(List<Books> l, string s)
-        {
-
-
-            foreach (var item in l)
-            {
-                if (item.Name.Equals(escolha2))
-                {
-                    return item;
-
-                }
-
-            }
-            Console.WriteLine("Livro não encontrado!");
-            return null;
         }
-
-        void EscreverArquivoEmprestimo(List<Books>l)
-        {
-            try
-            {
-                if (File.Exists("cadastroemprestimo.txt"))
-                {
-                    var temp = LerArquivo("cadastroemprestimo.txt");
-                    StreamWriter sw = new StreamWriter("cadastroemprestimo.txt");
-                    sw.WriteLine(temp + l.ToString());
-                    sw.Close();
-                }
-                else
-                {
-                    StreamWriter sw = new("cadastroemprestimo.txt");
-                    
-                   foreach (var item in l)
-                    {
-                        sw.WriteLine(item);
-                    }
-                    //sw.WriteLine(l.ToString());
-                    sw.Close();
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("ERRO: Não foi possível incluír o livro!");
-            }
-            finally
-            {
-                Console.WriteLine("Livro gravado com sucesso!");
-                Thread.Sleep(1000);
-                Console.WriteLine();
-            }
-        } // ok
-
-
-
-        /*void EscreverEmprestarLivro(string txt, string s)
-        {
-            try
-            {
-                if (File.Exists("cadastrolivro.txt"))
-                {
-                    var temp = LerArquivo("cadastrolivro.txt");
-                    StreamWriter sw = new StreamWriter("cadastrolivro.txt");
-
-                    if (temp.Contains(s)){
-                        ;
-                    }
-                    sw.WriteLine(temp + books.ToString());
-                    sw.Close();
-                }
-                else
-                {
-                    StreamWriter sw = new("cadastrolivro.txt");
-                    sw.WriteLine(books.ToString());
-                    sw.Close();
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("ERRO: Não foi possível incluír o livro!");
-            }
-            finally
-            {
-                Console.WriteLine("Livro gravado com sucesso!");
-                Thread.Sleep(1000);
-                Console.WriteLine();
-            }
-        }
-    }*/
-
-        Books DeletarLivroLista(List<Books> l, string s)
-        {
-            foreach (var item in l)
-            {
-                if (item.Name.Equals(s))
-                {
-                    return item;
-                }
-                else
-                {
-                    Console.WriteLine("\nLivro não encontrado!");
-                }
-
-            }
-            return null;
-
-            /*StreamReader sr = new StreamReader(s);
-
-            for(int i = 0; i<s.Length; i++)
-            {
-                sr.ReadLine();
-            }
-            return null;
-        }*/
-        }
-
-
-
     }
 }

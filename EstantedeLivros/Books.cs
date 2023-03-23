@@ -33,7 +33,7 @@ namespace EstantedeLivros
         public override string ToString()
         {
             return "Nome: " + Name + " | " + "Editora: " + Edition + " | " + "Autor 1: " + Writer
-                + " | " + "Autor 2: " + Writer2 + " | " + "ISBN: " + ISBN + "*";
+                + " | " + "Autor 2: " + Writer2 + " | " + "ISBN: " + ISBN;
         }
     }
 }
