@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.Design;
 using System.Globalization;
+using System.Xml.Linq;
 using EstantedeLivros;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -14,17 +15,27 @@ internal class Program
         List<Books> listaemprestar = new List<Books>();
         List<Books> listaleitura = new List<Books>();
 
+        CarregarLista(listaleitura, "cadastrolivroleitura.txt");
+        CarregarLista(listaemprestar, "cadastroemprestimo.txt");
+        CarregarLista(lista, "cadastrolivro.txt");
+
         do
         {
             escolhamenu = Menu();
 
             switch (escolhamenu)
             {
+                case 0:
+                    CriarArquivoLivrosLeitura();
+                    CriarArquivoLivrosEmprestados();
+                    CriarArquivoLivrosDisponiveis();
+                    System.Environment.Exit(0);
+                    break;
 
                 case 1:
                     Books books = CadastrarLivro();
                     lista.Add(books);
-                    CriarArquivoLivrosDisponiveis();
+                    //CriarArquivoLivrosDisponiveis();
                     break;
 
                 case 2:
@@ -33,8 +44,8 @@ internal class Program
                     escolhaemprestimo = Console.ReadLine();
                     listaemprestar.Add(IncluirListaEmprestimo(lista, escolhaemprestimo));
                     lista.Remove(DeletarLivro());
-                    CriarArquivoLivrosEmprestados();
-                    CriarArquivoLivrosDisponiveis();
+                    //CriarArquivoLivrosEmprestados();
+                    //CriarArquivoLivrosDisponiveis();
                     break;
 
                 case 3:
@@ -42,8 +53,8 @@ internal class Program
                     escolhaleitura = Console.ReadLine();
                     listaleitura.Add(IncluirListaLeitura(lista, listaemprestar, escolhaleitura));
                     lista.Remove(IncluirListaLeitura(lista, listaemprestar, escolhaleitura));
-                    CriarArquivoLivrosLeitura();
-                    CriarArquivoLivrosDisponiveis();
+                    //CriarArquivoLivrosLeitura();
+                    //CriarArquivoLivrosDisponiveis();
                     break;
 
                 case 4:
@@ -76,7 +87,7 @@ internal class Program
 
             Console.WriteLine("\n1 - Cadastrar Livro" + "\n2 - Emprestar Livro" +
                 "\n3 - Ler Livro" + "\n4 - Lista de Livros disponíveis" + "\n5 - Lista de Livros Emprestados" +
-                "\n6 - Lista de Livros Separados para Leitura");
+                "\n6 - Lista de Livros Separados para Leitura" + "\n0 - Sair");
 
             Console.Write("\nEscolha a opção desejada: ");
             escolhamenu = int.Parse(Console.ReadLine());
@@ -367,5 +378,40 @@ internal class Program
 
             return text;
         }
+
+        List<Books>CarregarLista(List<Books>e, string s)
+        {
+
+            if (File.Exists(s))
+            {
+                StreamReader sr = new StreamReader(s);
+
+                while (!sr.EndOfStream)
+                {
+
+                    string[] aux = sr.ReadLine().Split(";");
+
+
+
+                    string name = aux[0];
+                    string edition = aux[1];
+                    string writer = aux[2];
+                    string writer2 = aux[3];
+                    string isbn = aux[4];
+
+
+                    e.Add(new Books(name, edition, writer, writer2, isbn));
+                }
+                
+                sr.Close();
+            }
+            else
+            {
+                Console.WriteLine("Criando arquivo...");
+                Thread.Sleep(1000);
+            }
+            return e;
+        }
+
     }
 }

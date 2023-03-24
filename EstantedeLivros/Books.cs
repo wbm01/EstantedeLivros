@@ -11,11 +11,8 @@ namespace EstantedeLivros
         public string Name { get; set; }
         public string Edition { get; set; }
         public  string Writer { get; set; }
-        public string ?Writer2 { get; set; }
+        public string Writer2 { get; set; }
         public string ISBN { get; set; }
-        public bool Lent { get; set; }
-
-        public bool Reading { get; set; }
 
         public Books(string name, string edition, string writer, string writer2, string isbn)
         {
@@ -30,10 +27,15 @@ namespace EstantedeLivros
             
 
         
-        public override string ToString()
+        public string ToUser()
         {
             return "Nome: " + Name + " | " + "Editora: " + Edition + " | " + "Autor 1: " + Writer
                 + " | " + "Autor 2: " + Writer2 + " | " + "ISBN: " + ISBN;
+        }
+
+        public override string ToString()
+        {
+            return Name + ";" + Edition + ";" + Writer + ";" + Writer2 + ";" + ISBN;
         }
     }
 }
